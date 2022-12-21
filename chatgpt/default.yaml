@@ -1,0 +1,9 @@
+installed: true
+oauth:
+  clientSecret: ""
+  clientId: ""
+  cookieSecret: ""
+  oidcIssueUrl: ""
+
+openAI:
+  apiKey: ""

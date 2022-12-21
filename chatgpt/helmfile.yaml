@@ -1,0 +1,105 @@
+environments:
+  np:
+    values:
+      - default.yaml
+      - env/np.yaml
+  prod:
+    values:
+      - default.yaml
+      - env/prod.yaml
+---
+repositories:
+  - name: andreaswachs
+    url: https://andreaswachs.github.io/charts
+
+releases:
+  - name: chatgpt-web-client-{{ .Environment.Name }}
+    namespace: chatgpt-web-client-{{ .Environment.Name }}
+    chart: andreaswachs/gated-deployment
+    version: 0.1.0
+    installed: {{ .Values.installed | toYaml }}
+    hooks:
+    - events: ["prepare"]
+      showlogs: true
+      command: sh
+      args:
+        - "-c"
+        - curl -o secrets.tmp.yaml $(aws s3 presign s3://k8s-app-secrets/chatgpt-web-client-secrets.yaml --expires-in 30)
+    - events: ["postsync"]
+      showlogs: true
+      command: rm
+      args: ["secrets.tmp.yaml"]
+    values:
+      - tlsCert:
+          issuer:
+            name: letsencrypt-prod
+            kind: ClusterIssuer
+            group: cert-manager.io
+          name: "{{ .Values.host }}-tls"
+          secretName: "{{ .Values.host }}-tls"
+
+      - ingress:
+          host: "{{ .Values.host }}"
+
+      - oauth:
+          image:
+            repository: bitnami/oauth2-proxy
+            tag: "7.6.0"
+            pullPolicy: IfNotPresent
+        
+          cookieSecure: false
+          redirectUrl: "https://{{ .Values.host }}/oauth2/callback"
+          scope: "openid profile email name"
+          emailDomain: "wachs.dk"
+
+      - service:
+          metadata:
+            name: chatgpt-web-client-{{ .Environment.Name }}
+            namespace: chatgpt-web-client-{{ .Environment.Name }} 
+          spec:
+            selector:
+              app: chatgpt-web-client-{{ .Environment.Name }} 
+            type: ClusterIP
+            ports:
+              - name: chatgpt
+                protocol: TCP
+                port: 80
+                targetPort: 3000
+      - deployment:
+          metadata:
+            name: chatgpt-web-client-{{ .Environment.Name }}
+            namespace: chatgpt-web-client-{{ .Environment.Name }} 
+            labels:
+              app: chatgpt-web-client-{{ .Environment.Name }} 
+          spec:
+            selector:
+              matchLabels:
+                app: chatgpt-web-client-{{ .Environment.Name }} 
+            replicas: 1
+            strategy:
+              type: RollingUpdate
+              rollingUpdate:
+                maxSurge: 1
+                maxUnavailable: 1
+            template:
+              metadata:
+                labels:
+                  app: chatgpt-web-client-{{ .Environment.Name }} 
+              spec:
+                restartPolicy: Always
+                containers:
+                  - name: chatgpt
+                    image: yidadaa/chatgpt-next-web
+                    imagePullPolicy: IfNotPresent
+                    resources:
+                      requests:
+                        cpu: "10m"
+                        memory: "128Mi"
+                    env:
+                      - name: OPENAI_API_KEY
+                        value: "{{ .Values.openAI.apiKey }}"
+                      - name: HOSTNAME
+                        value: "0.0.0.0"
+                    ports:
+                      - containerPort: 3000
+                        name: chatgpt

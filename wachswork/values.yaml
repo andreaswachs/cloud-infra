@@ -1,0 +1,15 @@
+replicaCount: 3
+
+resources:
+  limits:
+    cpu: 50m
+    memory: 128Mi
+  requests:
+    cpu: 50m
+    memory: 128Mi
+
+autoscaling:
+  enabled: enabled
+  minReplicas: 3
+  maxReplicas: 15
+  targetCPUUtilizationPercentage: 70

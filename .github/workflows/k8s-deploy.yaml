@@ -1,0 +1,53 @@
+# Deploys the latest version of the given repo to the k8s cluster
+
+name: Helmfile sync
+
+on:
+  workflow_dispatch:
+    inputs:
+      env:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'np'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up k8s context
+        uses: azure/k8s-set-context@v1
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.KUBE_CONFIG }}
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        name: Configure AWS Credentials
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: eu-north-1
+ 
+      - name: Setup helmfile
+        uses: mamezou-tech/setup-helmfile@v2.0.0
+
+      - name: sync chatgpt-np
+        shell: bash
+        working-directory: ./chatgpt
+        run: |
+          helmfile sync --environment=${{ github.event.inputs.env }}
+
+
+          #      # Run the install script with the folder name as repo name
+          #      - name: Deploy to k8s
+          #        run: ./install.sh ${{ github.event.inputs.repo }}
+          #        env:
+          #          FAH_PASS_KEY: ${{ secrets.FAH_PASS_KEY }}
+          #          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          #          OAUTH2_CHATGPT_CLIENT_ID: ${{ secrets.OAUTH2_CHATGPT_CLIENT_ID }}
+          #          OAUTH2_CHATGPT_CLIENT_SECRET: ${{ secrets.OAUTH2_CHATGPT_CLIENT_SECRET }}
+          #          OAUTH2_CHATGPT_CLIENT_COOKIE: ${{ secrets.OAUTH2_CHATGPT_CLIENT_COOKIE }}

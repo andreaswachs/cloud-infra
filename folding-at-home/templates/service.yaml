@@ -1,0 +1,15 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: folding-at-home-svc
+  namespace: folding-at-home
+spec:
+  selector:
+    app: folding
+  type: ClusterIP
+  ports:
+    - name: folding
+      protocol: TCP
+      port: 80
+      targetPort: 7396 #80

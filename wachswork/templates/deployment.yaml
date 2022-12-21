@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wachswork
+  namespace: wachswork
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: wachswork
+  template:
+    metadata:
+      labels:
+        app: wachswork
+    spec:
+      initContainers:
+        - name: download-wachswork-website
+          image: appropriate/curl
+          command:
+            - sh
+            - -c
+            - curl -L https://raw.githubusercontent.com/andreaswachs/cloud-infra/main/bin/download_wachswork.sh | sh && rm -rf /tmp/data/* && mv /tmp/public/* /tmp/data
+          volumeMounts:
+            - name: website-storage
+              mountPath: /tmp/data
+      containers:
+        - image: nginx:stable
+          imagePullPolicy: IfNotPresent
+          name: wachswork
+          resources:
+            requests:
+              cpu: {{ .Values.resources.requests.cpu }}
+              memory: {{ .Values.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.resources.limits.cpu }}
+              memory: {{ .Values.resources.limits.memory }}
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: website-storage 
+              mountPath: /usr/share/nginx/html
+      volumes:
+      - name: website-storage
+        persistentVolumeClaim:
+          claimName: wachswork-pvc
+

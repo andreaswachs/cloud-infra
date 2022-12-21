@@ -1,0 +1,8 @@
+environments:
+  np:
+    values: []
+  prod:
+    values: []
+---
+helmfiles:
+  - path: chatgpt/helmfile.yaml
