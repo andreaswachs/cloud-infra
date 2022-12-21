@@ -23,24 +23,3 @@ spec:
             name: blog
             port:
               number: 80
-
-# apiVersion: traefik.containo.us/v1alpha1
-# kind: IngressRoute
-# metadata:
-#   name: blog-ingress
-#   annotations:
-#     cert-manager.io/cluster-issuer: letsencrypt-staging
-#     kubernetes.io/ingress.class: traefik
-# spec:
-#   entryPoints:
-#     - web
-#     - websecure
-#   routes:
-#     - match: Host(`wachs.work`)
-#       kind: Rule
-#       services:
-#         - name: blog
-#           port: 80
-#   tls:
-#     # Reference the Secret
-#     secretName: wachswork-cert
