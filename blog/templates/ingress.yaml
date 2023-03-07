@@ -6,25 +6,14 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: traefik
     cert-manager.io/cluster-issuer: letsencrypt-prod
-    traefik.ingress.kubernetes.io/router.middlewares: default-redirect-https@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: blog-redirect-https@kubernetescrd
 spec:
   tls:
   - hosts:
     - wachs.work
-    - "*.wachs.work"
     secretName: wachswork-cert
   rules:
   - host: wachs.work
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: blog
-            port:
-              number: 80
-  - host: "*.wachs.work"
     http:
       paths:
       - path: /
