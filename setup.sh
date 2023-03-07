@@ -8,6 +8,6 @@ helm install \
   --namespace cert-manager \
   --create-namespace \
   --version v1.10.1 \
-  --set installCRDs=truekubectl apply -f issuers.yaml
+  --set installCRDs=true
 
-kubectl apply -f issuers.yaml
+kubectl apply -f cluster/issuers.yaml
