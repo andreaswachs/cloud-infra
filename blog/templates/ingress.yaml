@@ -11,9 +11,20 @@ spec:
   tls:
   - hosts:
     - wachs.work
+    - www.wachs.work
     secretName: wachswork-cert
   rules:
   - host: wachs.work
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: blog
+            port:
+              number: 80
+  - host: www.wachs.work
     http:
       paths:
       - path: /

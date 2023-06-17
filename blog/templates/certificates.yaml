@@ -4,10 +4,10 @@ metadata:
   name: wachswork-cert
   namespace: blog
 spec:
-  commonName: 'wachs.work'
+  commonName: "*.wachs.work"
   secretName: wachswork-cert
   dnsNames:
-    - wachs.work
+    - "*.wachs.work"
   issuerRef:
     name: letsencrypt-staging
     kind: ClusterIssuer
