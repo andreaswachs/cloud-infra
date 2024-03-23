@@ -40,4 +40,4 @@ jobs:
       - name: Sync Helmfiles
         shell: bash
         run: |
-          make sync-${{ env.ENVIRONMENT }}
+          make sync-${{ inputs.env }}

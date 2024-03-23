@@ -23,14 +23,14 @@ releases:
       showlogs: true
       command: sh
       args:
-        - "-c"
-        - curl -o /tmp/secrets.tmp.yaml $(aws s3 presign s3://k8s-app-secrets/chatgpt-web-client-secrets.yaml --expires-in 30)
+        - -c
+        - curl -o secrets.tmp.yaml $(aws s3 presign s3://k8s-app-secrets/chatgpt-web-client-secrets.yaml --expires-in 30);
     - events: ["postsync"]
       showlogs: true
       command: rm
-      args: ["/tmp/secrets.tmp.yaml"]
+      args: ["secrets.tmp.yaml"]
     values:
-      - /tmp/secrets.tmp.yaml
+      - "secrets.tmp.yaml"
       - tlsCert:
           issuer:
             name: letsencrypt-prod

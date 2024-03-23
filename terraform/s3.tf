@@ -6,7 +6,7 @@ resource "aws_s3_bucket" "my_bucket" {
 
 # Uplad all files in the "../secrets" directory to the S3 bucket
 resource "aws_s3_object" "my_bucket_objects" {
-  for_each = fileset("../secrets", "**/*")
+  for_each = fileset("../secrets/objects", "**/*")
 
   force_destroy = true
 
