@@ -1,0 +1,56 @@
+name: Sync one app
+
+on:
+  workflow_dispatch:
+    inputs:
+      app:
+        description: 'App to deploy'
+        required: true
+        type: string
+      env:
+        description: 'Environment to deploy to'
+        required: true
+        type: choice
+        options:
+          - np
+          - prod
+          - all
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      # Check if the app has a folder in the apps directory
+      - name: Verify app exists
+        run: |
+          if [ ! -d apps/${{ inputs.app }} ]; then
+            echo "App does not exist"
+            exit 1
+          fi
+
+      - name: Set up k8s context
+        uses: azure/k8s-set-context@v1
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.KUBE_CONFIG }}
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        name: Configure AWS Credentials
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: eu-north-1
+ 
+      - name: Setup helmfile
+        uses: mamezou-tech/setup-helmfile@v2.0.0
+
+      - name: Sync Helmfile
+        shell: bash
+        working-directory: apps/${{ inputs.app }}
+        run: helmfile sync --environment=${{ inputs.env }}
+
