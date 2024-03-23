@@ -11,6 +11,7 @@ on:
         options:
           - np
           - prod
+          - all
 
 jobs:
   deploy:
@@ -40,4 +41,4 @@ jobs:
       - name: Sync Helmfiles
         shell: bash
         run: |
-          helmfile sync --environment=${{ github.event.inputs.env }}
+          make sync-${{ env.ENVIRONMENT }}

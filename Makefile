@@ -1,12 +1,12 @@
-ENVIRONMENT ?= np
-
-.PHONYL sync-all
+.PHONY: sync-all
 sync-all:
-	helmfile sync --environment=$(ENVIRONMENT)
+	helmfile sync --environment=np
+	helmfile sync --environment=prod
 
-.PHONY: sync-chatgpt
-sync-chatgpt:
-	cd chatgpt && \
-	helmfile sync --environment=$(ENVIRONMENT) && \
-	cd ..
+.PHONY: sync-np
+sync-np:
+	helmfile sync --environment=np
 
+.PHONY: sync-prod
+sync-prod:
+	helmfile sync --environment=prod
