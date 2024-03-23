@@ -1,7 +1,6 @@
 #!/bin/bash
 
 helm repo add jetstack https://charts.jetstack.io
-helm repo add couchdb https://apache.github.io/couchdb-helm
 helm repo update
 
 helm upgrade \
@@ -22,28 +21,4 @@ metadata:
   name: local-storage
 provisioner: kubernetes.io/no-provisioner
 volumeBindingMode: WaitForFirstConsumer
-EOF
-
-cat << EOF | kubectl apply -f -
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: local-pv
-spec:
-  capacity:
-    storage: 100Gi
-  accessModes:
-  - ReadWriteOnce
-  persistentVolumeReclaimPolicy: Retain
-  storageClassName: local-storage
-  local:
-    path: /home/ubuntu/volumes/pv1
-  nodeAffinity:
-    required:
-      nodeSelectorTerms:
-      - matchExpressions:
-        - key: kubernetes.io/hostname
-          operator: In
-          values:
-          - vmi1371041.contaboserver.net
 EOF
