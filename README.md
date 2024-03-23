@@ -1,2 +1,5 @@
-# infra
-Contains configuration for the infrastructure that powers my (for now limited to) personal website
+# cloud-infra
+
+This repository contains configuration for software that I have running in the cloud.
+
+This covers infrastructure in AWS and applications running in my self-hosted Kubernetes cluster.
