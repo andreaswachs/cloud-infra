@@ -1,5 +1,4 @@
-# Deploys the latest version of the given repo to the k8s cluster
-name: Helmfile sync
+name: Sync all apps
 
 on:
   workflow_dispatch:

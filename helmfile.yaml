@@ -3,5 +3,5 @@ environments:
   prod: {}
 ---
 helmfiles:
-  - path: chatgpt/helmfile.yaml
-  - path: wachswork/helmfile.yaml
+  - path: apps/chatgpt/helmfile.yaml
+  - path: apps/wachswork/helmfile.yaml
