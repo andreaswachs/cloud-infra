@@ -6,3 +6,4 @@ environments:
 ---
 helmfiles:
   - path: chatgpt/helmfile.yaml
+  - path: wachswork/helmfile.yaml

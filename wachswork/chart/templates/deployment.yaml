@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: wachswork
-  namespace: wachswork
+  namespace: {{ .Values.namespace }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
@@ -42,5 +42,5 @@ spec:
       volumes:
       - name: website-storage
         persistentVolumeClaim:
-          claimName: wachswork-pvc
+          claimName: wachswork-pvc-{{ .Values.environment }}
 

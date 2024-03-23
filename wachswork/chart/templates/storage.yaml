@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: wachswork-pv
+  name: wachswork-pv-{{ .Values.environment }}
 spec:
   capacity:
     storage: 512Mi
@@ -23,8 +23,8 @@ spec:
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: wachswork-pvc
-  namespace: wachswork
+  name: wachswork-pvc-{{ .Values.environment }}
+  namespace: {{ .Values.namespace }}
 spec:
   accessModes:
   - ReadWriteOnce

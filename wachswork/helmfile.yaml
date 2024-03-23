@@ -1,0 +1,38 @@
+environments:
+  np:
+    values:
+      - default.yaml
+      - env/np.yaml
+  prod:
+    values:
+      - default.yaml
+      - env/prod.yaml
+
+---
+helmDefaults:
+  createNamespace: true
+
+releases:
+  - name: www-wachs-work-{{ .Environment.Name }}
+    chart: ./chart
+    namespace: www-wachs-work
+    values:
+      - namespace: www-wachs-work-{{ .Environment.Name }}
+        environment: {{ .Environment.Name }}
+        replicaCount: {{ .Values.replicaCount }}
+        ingress:
+          hosts: {{ .Values.ingress.hosts | toYaml | nindent 12 }}
+        resources:
+          limits:
+            cpu: {{ .Values.resources.limits.cpu }}
+            memory: {{ .Values.resources.limits.memory }}
+          requests:
+            cpu: {{ .Values.resources.requests.cpu }}
+            memory: {{ .Values.resources.requests.memory }}
+        
+        autoscaling:
+          enabled: {{ .Values.autoscaling.enabled }}
+          minReplicas: {{ .Values.autoscaling.minReplicas }}
+          maxReplicas: {{ .Values.autoscaling.maxReplicas }}
+          targetCPUUtilizationPercentage: {{ .Values.autoscaling.targetCPUUtilizationPercentage }}
+

@@ -1,0 +1,18 @@
+ingress:
+  hosts:
+    - blog.np.wachs.work
+replicaCount: 1
+
+resources:
+  limits:
+    cpu: 50m
+    memory: 128Mi
+  requests:
+    cpu: 50m
+    memory: 128Mi
+
+autoscaling:
+  enabled: disabled
+  minReplicas: 1
+  maxReplicas: 1
+  targetCPUUtilizationPercentage: 70
