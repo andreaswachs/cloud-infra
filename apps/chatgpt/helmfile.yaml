@@ -24,13 +24,14 @@ releases:
       command: sh
       args:
         - -c
-        - curl -o secrets.tmp.yaml $(aws s3 presign s3://k8s-app-secrets/chatgpt-web-client-secrets.yaml --expires-in 30);
+        - curl -o secrets.tmp.yaml $(aws s3 presign s3://k8s-app-secrets/chatgpt-web-client-secrets.yaml --expires-in 5);
     - events: ["postsync"]
       showlogs: true
       command: rm
-      args: ["secrets.tmp.yaml"]
+      args:
+        - secrets.tmp.yaml
     values:
-      - "secrets.tmp.yaml"
+      - secrets.tmp.yaml
       - tlsCert:
           issuer:
             name: letsencrypt-prod
@@ -98,7 +99,7 @@ releases:
                         memory: "128Mi"
                     env:
                       - name: OPENAI_API_KEY
-                        value: "{{ .Values.openAI.apiKey }}"
+                        value: {{ exec "sh" (list "-c" "curl $(aws s3 presign s3://k8s-app-secrets/chatgpt-web-client-secrets.yaml --expires-in 5) | grep apiKey | awk '{ print $2 }'") }}
                       - name: HOSTNAME
                         value: "0.0.0.0"
                     ports:
