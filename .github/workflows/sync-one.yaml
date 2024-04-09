@@ -14,7 +14,6 @@ on:
         options:
           - np
           - prod
-          - all
 
 jobs:
   deploy:
