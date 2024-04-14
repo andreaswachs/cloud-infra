@@ -1,0 +1,82 @@
+environments:
+  np:
+    values:
+      - default.yaml
+      - env/np.yaml
+  prod:
+    values:
+      - default.yaml
+      - env/prod.yaml
+---
+repositories:
+  - name: andreaswachs
+    url: https://andreaswachs.github.io/charts
+
+releases:
+  - name: gh-webhook-{{ .Environment.Name }}
+    namespace: webhook-{{ .Environment.Name }}
+    chart: andreaswachs/https-service
+    version: 0.1.0
+    installed: {{ .Values.installed | toYaml }}
+    hooks:
+    values:
+      - tlsCert:
+          issuer:
+            name: letsencrypt-prod
+            kind: ClusterIssuer
+            group: cert-manager.io
+          name: "{{ .Values.host }}-tls"
+          secretName: "{{ .Values.host }}-tls"
+
+      - ingress:
+          host: "{{ .Values.host }}"
+
+      - service:
+          metadata:
+            name: gh-webhook-{{ .Environment.Name }}
+            namespace: webhook-{{ .Environment.Name }} 
+          spec:
+            selector:
+              app: gh-webhook-{{ .Environment.Name }} 
+            type: ClusterIP
+            ports:
+              - name: http
+                protocol: TCP
+                port: 80
+                targetPort: 8080
+      - deployment:
+          metadata:
+            name: gh-webhook-{{ .Environment.Name }}
+            namespace: webhook-{{ .Environment.Name }} 
+            labels:
+              app: gh-webhook-{{ .Environment.Name }} 
+          spec:
+            selector:
+              matchLabels:
+                app: gh-webhook-{{ .Environment.Name }} 
+            replicas: 1
+            strategy:
+              type: RollingUpdate
+              rollingUpdate:
+                maxSurge: 1
+                maxUnavailable: 1
+            template:
+              metadata:
+                labels:
+                  app: gh-webhook-{{ .Environment.Name }} 
+              spec:
+                restartPolicy: Always
+                containers:
+                  - name: webhook
+                    image: andreaswachs/gh-webhook:{{ if .Values.tag }}{{ .Values.tag }}{{ else }}latest{{ end }}
+                    imagePullPolicy: {{ if .Values.imagePullPolicy }}{{ .Values.imagePullPolicy }}{{ else }}IfNotPresent{{ end }}
+                    resources:
+                      requests:
+                        cpu: "10m"
+                        memory: "128Mi"
+                    env:
+                      - name: WEBHOOK_SECRET
+                        value: {{ exec "sh" (list "-c" "curl $(aws s3 presign s3://k8s-app-secrets/gh-webhook.yaml --expires-in 5) | grep secret | awk '{ print $2 }'") }}
+                    ports:
+                      - containerPort: 8080
+                        name: http
