@@ -1,6 +1,6 @@
 resource "aws_s3_bucket" "my_bucket" {
   bucket = "k8s-app-secrets"
-  
+
   force_destroy = true
 }
 
@@ -12,6 +12,5 @@ resource "aws_s3_object" "my_bucket_objects" {
 
   bucket = aws_s3_bucket.my_bucket.bucket
   key    = each.value
-  source = "../secrets/${each.value}"
+  source = "../secrets/objects/${each.value}"
 }
-
