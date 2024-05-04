@@ -14,13 +14,15 @@ resource "aws_iam_policy" "github" {
 }
 
 data "aws_iam_policy_document" "github" {
-  # Allow to assume the role
+  # Allow github user to read ssm parameters
   statement {
-    actions = ["sts:AssumeRoleWithWebIdentity"]
-    effect  = "Allow"
-    resources = [
-      module.my_github_oidc_provider_role.iam_role.arn,
+    actions = [
+      "ssm:GetParameter",
+      "ssm:GetParameters",
+      "ssm:GetParametersByPath",
     ]
+    effect    = "Allow"
+    resources = ["*"]
   }
 }
 
