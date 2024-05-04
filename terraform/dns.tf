@@ -19,6 +19,8 @@ resource "aws_route53_record" "wildcard" {
   records = ["173.212.235.167"]
 }
 
-output "name_servers" {
-  value = aws_route53_zone.wachswork.name_servers
+resource "aws_ssm_parameter" "name_servers" {
+  name  = "/dns/wachswork/name_servers"
+  value = jsonencode(aws_route53_zone.wachswork.name_servers)
+  type  = "SecureString"
 }

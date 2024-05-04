@@ -27,6 +27,8 @@ resource "aws_iam_role_policy_attachment" "github" {
   policy_arn = aws_iam_policy.github.arn
 }
 
-output "github_role_arn" {
+resource "aws_ssm_parameter" "github_role_arn" {
+  name  = "/github/role/arn"
   value = module.my_github_oidc_provider_role.iam_role.arn
+  type  = "SecureString"
 }
