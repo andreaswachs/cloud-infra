@@ -14,11 +14,13 @@ resource "aws_iam_policy" "github" {
 }
 
 data "aws_iam_policy_document" "github" {
-  # Allow the GitHub role to get s3 objects from the k8s-apps-secrets bucket
+  # Allow to assume the role
   statement {
-    actions   = ["s3:GetObject"]
-    effect    = "Allow"
-    resources = ["${aws_s3_bucket.my_bucket.arn}/*"]
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+    effect  = "Allow"
+    resources = [
+      module.my_github_oidc_provider_role.iam_role.arn,
+    ]
   }
 }
 
