@@ -1,0 +1,52 @@
+# Due to the need to unseal the vault instance, this should be run as a one-off installation (disregarding upgrades)
+# Perhaps this should only be ran locally
+repositories:
+  - name: hashicorp
+    url: https://helm.releases.hashicorp.com
+
+environments:
+  default:
+    values:
+      - storage:
+          access_key: "ref+awsssm://vault/storage/access_key"
+          secret_key: "ref+awsssm://vault/storage/secret_key"
+          bucket_name: "ref+awsssm://vault/storage/bucket_name"
+
+releases:
+  - name: vault
+    namespace: vault
+    chart: hashicorp/vault
+    version: 0.27.0
+    installed: true
+    values:
+      - global:
+          enabled: true
+          tlsDisable: false
+        injector:
+          enabled: false
+        server:
+          extraEnvironmentVars:
+            VAULT_ADDR: "http://127.0.0.1:8200"
+          standalone:
+            enabled: true
+            config: |
+              ui = true
+
+              listener "tcp" {
+                tls_disable = 1
+                address = "[::]:8200"
+                cluster_address = "[::]:8201"
+                # Enable unauthenticated metrics access (necessary for Prometheus Operator)
+                telemetry {
+                  unauthenticated_metrics_access = "true"
+                }
+              }
+
+              storage "s3" {
+                access_key = {{ .Values.storage.access_key | fetchSecretValue | quote }}
+                secret_key = {{ .Values.storage.secret_key | fetchSecretValue | quote }}
+                bucket = {{ .Values.storage.bucket_name | fetchSecretValue | quote }}
+                region = "eu-north-1"
+              }
+      - injector:
+          enabled: false
