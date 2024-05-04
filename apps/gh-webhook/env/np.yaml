@@ -1,4 +1,4 @@
 host: webhook.np.wachs.work
 imagePullPolicy: Always
-tag: "c73c5b3d1511620475d8af70ad3222d86268833b"
 installed: true
+tag: "c73c5b3d1511620475d8af70ad3222d86268833b"

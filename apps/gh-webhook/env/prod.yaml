@@ -1,4 +1,4 @@
 host: webhook.wachs.work
-tag: "latest"
 imagePullPolicy: Always
 installed: true
+tag: "latest"
