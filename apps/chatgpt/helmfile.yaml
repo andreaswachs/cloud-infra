@@ -18,20 +18,13 @@ releases:
     chart: andreaswachs/gated-deployment
     version: 0.1.0
     installed: {{ .Values.installed | toYaml }}
-    hooks:
-    - events: ["prepare"]
-      showlogs: true
-      command: sh
-      args:
-        - -c
-        - curl -o secrets.tmp.yaml $(aws s3 presign s3://k8s-app-secrets/chatgpt-web-client-secrets.yaml --expires-in 5);
-    - events: ["postsync"]
-      showlogs: true
-      command: rm
-      args:
-        - secrets.tmp.yaml
     values:
-      - secrets.tmp.yaml
+      - oauth:
+          clientSecret: {{ .Values.ssmParamPaths.oauth.clientSecret | fetchSecretValue | quote }}
+          clientId: {{ .Values.ssmParamPaths.oauth.clientId | fetchSecretValue | quote }}
+          cookieSecret: {{ .Values.ssmParamPaths.oauth.cookieSecret | fetchSecretValue | quote }}
+          oidcIssueUrl: {{ .Values.ssmParamPaths.oauth.oidcIssueUrl | fetchSecretValue | quote }}
+
       - tlsCert:
           issuer:
             name: letsencrypt-prod
@@ -48,7 +41,7 @@ releases:
             repository: bitnami/oauth2-proxy
             tag: "7.6.0"
             pullPolicy: IfNotPresent
-        
+
           cookieSecure: false
           redirectUrl: "https://{{ .Values.host }}/oauth2/callback"
           scope: "openid profile email name"
@@ -57,10 +50,10 @@ releases:
       - service:
           metadata:
             name: chatgpt-web-client-{{ .Environment.Name }}
-            namespace: chatgpt-web-client-{{ .Environment.Name }} 
+            namespace: chatgpt-web-client-{{ .Environment.Name }}
           spec:
             selector:
-              app: chatgpt-web-client-{{ .Environment.Name }} 
+              app: chatgpt-web-client-{{ .Environment.Name }}
             type: ClusterIP
             ports:
               - name: chatgpt
@@ -70,13 +63,13 @@ releases:
       - deployment:
           metadata:
             name: chatgpt-web-client-{{ .Environment.Name }}
-            namespace: chatgpt-web-client-{{ .Environment.Name }} 
+            namespace: chatgpt-web-client-{{ .Environment.Name }}
             labels:
-              app: chatgpt-web-client-{{ .Environment.Name }} 
+              app: chatgpt-web-client-{{ .Environment.Name }}
           spec:
             selector:
               matchLabels:
-                app: chatgpt-web-client-{{ .Environment.Name }} 
+                app: chatgpt-web-client-{{ .Environment.Name }}
             replicas: 1
             strategy:
               type: RollingUpdate
@@ -86,7 +79,7 @@ releases:
             template:
               metadata:
                 labels:
-                  app: chatgpt-web-client-{{ .Environment.Name }} 
+                  app: chatgpt-web-client-{{ .Environment.Name }}
               spec:
                 restartPolicy: Always
                 containers:
@@ -99,7 +92,7 @@ releases:
                         memory: "128Mi"
                     env:
                       - name: OPENAI_API_KEY
-                        value: {{ exec "sh" (list "-c" "curl $(aws s3 presign s3://k8s-app-secrets/chatgpt-web-client-secrets.yaml --expires-in 5) | grep apiKey | awk '{ print $2 }'") }}
+                        value: {{ .Values.ssmParamPaths.openAI.apiKey | fetchSecretValue | quote }}
                       - name: HOSTNAME
                         value: "0.0.0.0"
                     ports:

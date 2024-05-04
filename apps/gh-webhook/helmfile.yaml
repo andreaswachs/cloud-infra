@@ -34,10 +34,10 @@ releases:
       - service:
           metadata:
             name: gh-webhook-{{ .Environment.Name }}
-            namespace: webhook-{{ .Environment.Name }} 
+            namespace: webhook-{{ .Environment.Name }}
           spec:
             selector:
-              app: gh-webhook-{{ .Environment.Name }} 
+              app: gh-webhook-{{ .Environment.Name }}
             type: ClusterIP
             ports:
               - name: http
@@ -47,13 +47,13 @@ releases:
       - deployment:
           metadata:
             name: gh-webhook-{{ .Environment.Name }}
-            namespace: webhook-{{ .Environment.Name }} 
+            namespace: webhook-{{ .Environment.Name }}
             labels:
-              app: gh-webhook-{{ .Environment.Name }} 
+              app: gh-webhook-{{ .Environment.Name }}
           spec:
             selector:
               matchLabels:
-                app: gh-webhook-{{ .Environment.Name }} 
+                app: gh-webhook-{{ .Environment.Name }}
             replicas: 1
             strategy:
               type: RollingUpdate
@@ -63,7 +63,7 @@ releases:
             template:
               metadata:
                 labels:
-                  app: gh-webhook-{{ .Environment.Name }} 
+                  app: gh-webhook-{{ .Environment.Name }}
               spec:
                 restartPolicy: Always
                 containers:
@@ -76,7 +76,7 @@ releases:
                         memory: "128Mi"
                     env:
                       - name: WEBHOOK_SECRET
-                        value: {{ exec "sh" (list "-c" "curl $(aws s3 presign s3://k8s-app-secrets/gh-webhook.yaml --expires-in 5) | grep secret | awk '{ print $2 }'") }}
+                        value: {{ .Values.webhookSecret | fetchSecretValue | quote }}
                     ports:
                       - containerPort: 8080
                         name: http

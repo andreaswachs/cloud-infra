@@ -1,1 +1,2 @@
 installed: true
+webhookSecret: "ref+awsssm://k8s/webhook/webhookSecret"
