@@ -1,9 +1,5 @@
 # Due to the need to unseal the vault instance, this should be run as a one-off installation (disregarding upgrades)
 # Perhaps this should only be ran locally
-repositories:
-  - name: hashicorp
-    url: https://helm.releases.hashicorp.com
-
 environments:
   default:
     values:
@@ -11,6 +7,10 @@ environments:
           access_key: "ref+awsssm://vault/storage/access_key"
           secret_key: "ref+awsssm://vault/storage/secret_key"
           bucket_name: "ref+awsssm://vault/storage/bucket_name"
+---
+repositories:
+  - name: hashicorp
+    url: https://helm.releases.hashicorp.com
 
 releases:
   - name: vault

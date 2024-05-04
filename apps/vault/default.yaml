@@ -1,5 +1,0 @@
-installed: true
-storage:
-  access_key: "ref+awsssm://vault/storage/access_key"
-  secret_key: "ref+awsssm://vault/storage/secret_key"
-  bucket_name: "ref+awsssm://vault/storage/bucket_name
