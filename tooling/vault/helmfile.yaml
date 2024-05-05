@@ -11,6 +11,8 @@ environments:
 repositories:
   - name: hashicorp
     url: https://helm.releases.hashicorp.com
+  - name: banzaicloud-stable
+    url: http://kubernetes-charts.banzaicloud.com/branch/master
 
 releases:
   - name: vault
@@ -48,5 +50,26 @@ releases:
                 bucket = {{ .Values.storage.bucket_name | fetchSecretValue | quote }}
                 region = "eu-north-1"
               }
-      - injector:
-          enabled: false
+  - name: vault-ingress
+    namespace: vault
+    chart: "./vault-ingress"
+    needs: ["vault/vault"]
+    installed: true
+    values:
+      - host: "vault.wachs.work"
+        secretName: "vault-tls-crt-prod"
+        service:
+          name: "vault"
+          port: 8200
+  - name: vault-secrets-webhook-prereq
+    namespace: vault
+    chart: "./vault-secrets-webhook-prereq"
+    needs: ["vault/vault"]
+    installed: true
+  - name: vault-secrets-webhook
+    namespace: vault
+    chart: "banzaicloud-stable/vault-secrets-webhook"
+    needs: ["vault/vault-secrets-webhook-prereq"]
+    values:
+      - env:
+          VAULT_PATH: "kubernetes"

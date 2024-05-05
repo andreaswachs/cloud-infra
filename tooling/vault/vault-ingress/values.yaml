@@ -1,0 +1,12 @@
+host: ""
+secretName: ""
+
+tlsCert:
+  issuer:
+    name: "letsencrypt-prod"
+    kind: "ClusterIssuer"
+    group: "cert-manager.io"
+
+service:
+  name: ""
+  port: 8200

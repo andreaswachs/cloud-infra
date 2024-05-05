@@ -1,0 +1,26 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: add-vault-annotations
+  annotations:
+    policies.kyverno.io/title: Add Vault annotations
+    policies.kyverno.io/category: Sample
+    policies.kyverno.io/minversion: 1.6.0
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/subject: Label
+spec:
+  rules:
+  - name: add-vault-annotations
+    match:
+      any:
+      - resources:
+          kinds:
+          - Pod
+          - ConfigMap
+          - Secret
+    mutate:
+      patchStrategicMerge:
+        metadata:
+          annotations:
+            vault.security.banzaicloud.io/vault-namespace: "vault"
+            vault.security.banzaicloud.io/vault-addr: "http://vault.vault.svc.cluster.local:8200"

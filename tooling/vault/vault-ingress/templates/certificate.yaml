@@ -1,0 +1,15 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: "{{ .Release.Name }}-tls-crt-prod"
+  namespace: "{{ .Release.Namespace }}"
+spec:
+  secretName: {{ .Values.secretName | quote }}
+  duration: 2160h # 90d
+  renewBefore: 360h # 15d
+  dnsNames:
+    - {{ .Values.host | quote }}
+  issuerRef:
+    name: "{{ .Values.tlsCert.issuer.name }}"
+    kind: "{{ .Values.tlsCert.issuer.kind }}"
+    group: "{{ .Values.tlsCert.issuer.group }}"

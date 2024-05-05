@@ -27,3 +27,8 @@ variable "gh_webhook_secret" {
   description = "GitHub webhook secret"
   type        = string
 }
+
+variable "vault_root_token" {
+  description = "Vault root token"
+  type        = string
+}

@@ -68,3 +68,9 @@ resource "aws_ssm_parameter" "vault_storage_bucket_name" {
   value = module.s3_bucket[0].s3_bucket_id
   type  = "SecureString"
 }
+
+resource "aws_ssm_parameter" "vault_root_token" {
+  name  = "/vault/root_token"
+  value = var.vault_root_token
+  type  = "SecureString"
+}
