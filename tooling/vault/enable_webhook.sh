@@ -1,16 +1,11 @@
 #!/bin/bash
 
-should_close_portforward=false
-
-# If nothing is listening on port 8200, port-forward the vault service
-if ! nc -z localhost 8200; then
-    kubectl port-forward svc/vault 8200:8200 -n vault &
-    should_close_portforward=true
-fi
-
-
-export VAULT_ADDR=http://localhost:8200
+export VAULT_ADDR=https://vault.wachs.work
 export VAULT_TOKEN=$(read -sp "Enter the root token for the vault: " token && echo $token)
+
+export auth0_base_url_full="wachs.eu.auth0.com"
+export auth0_client_id="vbhf8DHKKiURoXYdKqfxY6eX8KbXxFTJ"
+export auth0_client_secret=$(read -sp "Enter the client secret for the Auth0 application: " client_secret && echo $client_secret)
 
 # Create a shorthand for executing vault commands in the vault pod
 vault="vault"
@@ -61,7 +56,11 @@ $vault write auth/kubernetes/role/default \
   policies=default \
   ttl=1h
 
-if [ $should_close_portforward = 'true' ]; then
-    echo "Closing port-forward"
-    pkill -f "kubectl port-forward svc/vault 8200:8200 -n vault"
-fi
+$vault auth enable oidc
+$vault write auth/oidc/config \
+  oidc_discovery_url="${auth0_base_url_full}" \
+  oidc_client_id="${auth0_client_id}" \
+  oidc_client_secret="${auth0_client_secret}" \
+  bound_issuer="${auth0_base_url_full}" \
+  tune/listing_visibility=unauth \
+  default_role=admi

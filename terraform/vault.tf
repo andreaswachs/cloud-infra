@@ -50,6 +50,62 @@ resource "aws_iam_user_policy" "vault_storage" {
   })
 }
 
+# add KV for developers
+resource "vault_mount" "apps" {
+  type = "kv"
+  options = {
+    version = "2"
+  }
+  path = "apps"
+}
+
+###
+#
+# Policies
+#
+###
+
+# Create the data for the policies
+data "vault_policy_document" "admin_policy_content" {
+  rule {
+    path         = "*"
+    capabilities = ["create", "read", "update", "delete", "list", "sudo"]
+    description  = "Policy that allows everything. When given to a token in a namespace, will be like a namespace-root token"
+  }
+}
+
+data "vault_policy_document" "apps_admin" {
+  rule {
+    path         = "apps/*"
+    capabilities = ["create", "read", "update", "delete", "list"]
+    description  = ""
+  }
+}
+
+data "vault_policy_document" "apps_reader" {
+  rule {
+    path         = "apps/*"
+    capabilities = ["read", "list"]
+    description  = ""
+  }
+}
+
+resource "vault_policy" "apps_reader" {
+  name   = "apps_reader"
+  policy = data.vault_policy_document.apps_reader.hcl
+}
+
+# add the policies
+resource "vault_policy" "admin" {
+  name   = "admin"
+  policy = data.vault_policy_document.admin_policy_content.hcl
+}
+
+resource "vault_policy" "apps" {
+  name   = "apps"
+  policy = data.vault_policy_document.apps_admin.hcl
+}
+
 # Put the vault_storage user's access key and secret key into SSM Parameters'
 resource "aws_ssm_parameter" "vault_storage_access_key" {
   name  = "/vault/storage/access_key"
