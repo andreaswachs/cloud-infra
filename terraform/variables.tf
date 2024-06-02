@@ -49,7 +49,7 @@ variable "chatgpt_oauth_cookie_secret" {
   type        = string
 }
 
-variable "chatgpt_oauth_oidc_issue_url" {
+variable "chatgpt_oauth_oidc_issuer_url" {
   description = "OAuth OIDC issue URL"
   type        = string
 }

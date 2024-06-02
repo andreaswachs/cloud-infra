@@ -16,14 +16,21 @@ releases:
   - name: chatgpt-web-client-{{ .Environment.Name }}
     namespace: chatgpt-web-client-{{ .Environment.Name }}
     chart: andreaswachs/gated-deployment
-    version: 0.1.0
+    version: 1.0.0
     installed: {{ .Values.installed | toYaml }}
     values:
       - oauth:
-          clientSecret: {{ .Values.ssmParamPaths.oauth.clientSecret | fetchSecretValue | quote }}
-          clientId: {{ .Values.ssmParamPaths.oauth.clientId | fetchSecretValue | quote }}
-          cookieSecret: {{ .Values.ssmParamPaths.oauth.cookieSecret | fetchSecretValue | quote }}
-          oidcIssueUrl: {{ .Values.ssmParamPaths.oauth.oidcIssueUrl | fetchSecretValue | quote }}
+          configStrategy: env
+
+          deployment:
+            namespace: "chatgpt-web-client-{{ .Environment.Name }}"
+            annotations:
+              vault.security.banzaicloud.io/vault-role: apps_reader
+
+          clientSecret: "vault:apps/data/chatgpt-web-client#oauth_client_secret"
+          clientId: "vault:apps/data/chatgpt-web-client#oauth_client_id"
+          cookieSecret: "vault:apps/data/chatgpt-web-client#oauth_cookie_secret"
+          oidcIssueUrl: "vault:apps/data/chatgpt-web-client#oauth_oidc_issuer_url"
 
       - tlsCert:
           issuer:
@@ -95,7 +102,7 @@ releases:
                         memory: "128Mi"
                     env:
                       - name: OPENAI_API_KEY
-                        value: "vault:apps/data/api_keys/openai#openai_api_key"
+                        value: "vault:apps/data/chatgpt-web-client#openai_api_key"
                       - name: HOSTNAME
                         value: "0.0.0.0"
                     ports:

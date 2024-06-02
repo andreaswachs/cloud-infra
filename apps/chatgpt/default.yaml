@@ -1,10 +1,1 @@
 installed: true
-
-ssmParamPaths:
-  openAI:
-    apiKey: "ref+awsssm://k8s/openAI/apiKey"
-  oauth:
-    clientSecret: "ref+awsssm://k8s/chatgpt/oauth/clientSecret"
-    clientId: "ref+awsssm://k8s/chatgpt/oauth/clientId"
-    cookieSecret: "ref+awsssm://k8s/chatgpt/oauth/cookieSecret"
-    oidcIssueUrl: "ref+awsssm://k8s/chatgpt/oauth/oidcIssueUrl"
