@@ -78,7 +78,7 @@ releases:
             selector:
               matchLabels:
                 app: chatgpt-web-client-{{ .Environment.Name }}
-            replicas: 1
+            replicas: {{ if eq .Environment.Name "prod" }}2{{ else }}1{{ end }}
             strategy:
               type: RollingUpdate
               rollingUpdate:
@@ -94,7 +94,7 @@ releases:
                 restartPolicy: Always
                 containers:
                   - name: chatgpt
-                    image: yidadaa/chatgpt-next-web
+                    image: yidadaa/chatgpt-next-web:v2.12.3
                     imagePullPolicy: IfNotPresent
                     resources:
                       requests:
