@@ -39,3 +39,33 @@ resource "aws_ssm_parameter" "gh_webhook_secret" {
   type        = "SecureString"
   value       = var.gh_webhook_secret
 }
+
+resource "vault_kv_secret_v2" "openai_api_key" {
+  mount = vault_mount.apps.path
+  name  = "/api_keys/openai"
+
+  delete_all_versions = true
+
+  data_json = jsonencode({
+    openai_api_key = var.chatgpt_openai_api_key
+  })
+
+  custom_metadata {
+    max_versions = 10
+  }
+}
+
+resource "vault_kv_secret_v2" "gh_webhook_secret" {
+  mount = vault_mount.apps.path
+  name  = "/webhooks/github"
+
+  delete_all_versions = true
+
+  data_json = jsonencode({
+    gh_webhooks = var.gh_webhook_secret
+  })
+
+  custom_metadata {
+    max_versions = 10
+  }
+}
