@@ -52,7 +52,7 @@ releases:
           cookieSecure: false
           redirectUrl: "https://{{ .Values.host }}/oauth2/callback"
           scope: "openid profile email name"
-          emailDomain: "wachs.dk"
+          emailDomain: "wachs.dk,wachs.email"
 
       - service:
           metadata:
