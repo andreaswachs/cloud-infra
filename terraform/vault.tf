@@ -50,13 +50,45 @@ resource "aws_iam_user_policy" "vault_storage" {
   })
 }
 
+data "kubernetes_config_map_v1" "kubernetes_ca_cert" {
+  metadata {
+    name      = "kube-root-ca.crt"
+    namespace = "kube-public"
+  }
+}
+
+data "kubernetes_secret_v1" "vault_service_account_jwt" {
+  metadata {
+    name      = "vault-auth"
+    namespace = "vault"
+  }
+}
+
+resource "vault_kubernetes_secret_backend" "config" {
+  path                 = "kubernetes"
+  description          = "kubernetes secrets engine description"
+  kubernetes_host      = var.kubernetes_host
+  kubernetes_ca_cert   = data.kubernetes_config_map_v1.kubernetes_ca_cert.data["ca.crt"]
+  service_account_jwt  = data.kubernetes_secret_v1.vault_service_account_jwt.data["token"]
+  disable_local_ca_jwt = false
+}
+
+resource "vault_kubernetes_auth_backend_role" "apps_reader" {
+  backend                          = vault_kubernetes_secret_backend.config.path
+  bound_service_account_names      = ["*"]
+  bound_service_account_namespaces = ["*"]
+  role_name                        = "apps_reader"
+  token_policies                   = [vault_policy.apps.name]
+}
+
 # add KV for developers
 resource "vault_mount" "apps" {
   type = "kv"
   options = {
     version = "2"
   }
-  path = "apps"
+  path        = "apps"
+  description = "KV Store for application secrets"
 }
 
 ###
@@ -66,7 +98,7 @@ resource "vault_mount" "apps" {
 ###
 
 # Create the data for the policies
-data "vault_policy_document" "admin_policy_content" {
+data "vault_policy_document" "global_admin" {
   rule {
     path         = "*"
     capabilities = ["create", "read", "update", "delete", "list", "sudo"]
@@ -74,7 +106,7 @@ data "vault_policy_document" "admin_policy_content" {
   }
 }
 
-data "vault_policy_document" "apps_admin" {
+data "vault_policy_document" "apps" {
   rule {
     path         = "apps/*"
     capabilities = ["create", "read", "update", "delete", "list"]
@@ -85,7 +117,7 @@ data "vault_policy_document" "apps_admin" {
 data "vault_policy_document" "apps_reader" {
   rule {
     path         = "apps/*"
-    capabilities = ["read", "list"]
+    capabilities = ["read"]
     description  = ""
   }
 }
@@ -98,13 +130,15 @@ resource "vault_policy" "apps_reader" {
 # add the policies
 resource "vault_policy" "admin" {
   name   = "admin"
-  policy = data.vault_policy_document.admin_policy_content.hcl
+  policy = data.vault_policy_document.global_admin.hcl
 }
 
 resource "vault_policy" "apps" {
   name   = "apps"
-  policy = data.vault_policy_document.apps_admin.hcl
+  policy = data.vault_policy_document.apps.hcl
 }
+
+
 
 # Put the vault_storage user's access key and secret key into SSM Parameters'
 resource "aws_ssm_parameter" "vault_storage_access_key" {
@@ -122,11 +156,5 @@ resource "aws_ssm_parameter" "vault_storage_secret_key" {
 resource "aws_ssm_parameter" "vault_storage_bucket_name" {
   name  = "/vault/storage/bucket_name"
   value = module.s3_bucket[0].s3_bucket_id
-  type  = "SecureString"
-}
-
-resource "aws_ssm_parameter" "vault_root_token" {
-  name  = "/vault/root_token"
-  value = var.vault_root_token
   type  = "SecureString"
 }
