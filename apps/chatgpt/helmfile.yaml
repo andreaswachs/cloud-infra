@@ -66,6 +66,7 @@ releases:
             namespace: chatgpt-web-client-{{ .Environment.Name }}
             labels:
               app: chatgpt-web-client-{{ .Environment.Name }}
+
           spec:
             selector:
               matchLabels:
@@ -80,6 +81,8 @@ releases:
               metadata:
                 labels:
                   app: chatgpt-web-client-{{ .Environment.Name }}
+                annotations:
+                  vault.security.banzaicloud.io/vault-role: "apps_reader"
               spec:
                 restartPolicy: Always
                 containers:
@@ -92,7 +95,7 @@ releases:
                         memory: "128Mi"
                     env:
                       - name: OPENAI_API_KEY
-                        value: {{ .Values.ssmParamPaths.openAI.apiKey | fetchSecretValue | quote }}
+                        value: "vault:apps/data/api_keys/openai#openai_api_key"
                       - name: HOSTNAME
                         value: "0.0.0.0"
                     ports:
