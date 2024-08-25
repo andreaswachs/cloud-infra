@@ -1,36 +1,57 @@
+locals {
+  # IPv4 addresses for github.com
+  github_ips_A = [
+    "185.199.108.153",
+    "185.199.109.153",
+    "185.199.110.153",
+    "185.199.111.153"
+  ]
+
+  # IPv6 addresses for github.com
+  github_ips_AAAA = [
+    "2606:50c0:8000::153",
+    "2606:50c0:8001::153",
+    "2606:50c0:8002::153",
+    "2606:50c0:8003::153"
+  ]
+}
+
 #
 # wachs.work
 #
 resource "aws_route53_zone" "wachswork" {
   name    = "wachs.work"
-  comment = "Managed by Terraform - wachs.work"
+  comment = "Managed by Terraform"
 }
 
-resource "aws_route53_record" "wachswork" {
+resource "aws_route53_record" "wachswork_ipv4" {
   name    = "wachs.work"
   zone_id = aws_route53_zone.wachswork.zone_id
   type    = "A"
   ttl     = "300"
-  records = ["173.212.235.167"]
+  records = local.github_ips_A
 }
 
-resource "aws_route53_record" "wildcard_wachswork" {
-  name    = "*.wachs.work"
+resource "aws_route53_record" "wachswork_ipv6" {
+  name    = "wachs.work"
   zone_id = aws_route53_zone.wachswork.zone_id
-  type    = "A"
+  type    = "AAAA"
   ttl     = "300"
-  records = ["173.212.235.167"]
+  records = local.github_ips_AAAA
 }
 
-resource "aws_ssm_parameter" "name_servers_wachswork" {
-  name  = "/dns/wachswork/name_servers"
-  value = jsonencode(aws_route53_zone.wachswork.name_servers)
-  type  = "String"
+resource "aws_route53_record" "www_wachswork" {
+  name    = "www.wachs.work"
+  zone_id = aws_route53_zone.wachswork.zone_id
+  type    = "CNAME"
+  ttl     = "300"
+  records = ["andreaswachs.github.io/wachswork"]
 }
 
 #
-#  wachs.email
+#  wachs.email - ProtonMail
 #
+
 resource "aws_route53_zone" "wachsemail" {
   name    = "wachs.email"
   comment = "Managed by Terraform - wachs.email"
@@ -74,11 +95,4 @@ resource "aws_route53_record" "wachsemail_dkim_3" {
   type    = "CNAME"
   ttl     = "300"
   records = ["protonmail3.domainkey.dr6a3pp5hnutjxzamczsmsnfmtqpv3l5dewazmjo7vxyow6efxn2q.domains.proton.ch."]
-}
-
-
-resource "aws_ssm_parameter" "name_servers_wachsemail" {
-  name  = "/dns/wachsemail/name_servers"
-  value = jsonencode(aws_route53_zone.wachsemail.name_servers)
-  type  = "String"
 }
