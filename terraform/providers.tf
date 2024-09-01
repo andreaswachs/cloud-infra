@@ -1,5 +1,4 @@
-provider "kubernetes" {
-  # TODO: make sure this works in Workflows
-  config_path    = "~/.kube/config"
-  config_context = "wachswork"
+
+provider "aws" {
+  region = "eu-north-1"
 }
