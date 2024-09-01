@@ -1,61 +1,32 @@
-// Let's create a private s3 bucket for my personal media
+module "storage_media_01" {
+  source  = "terraform-aws-modules/s3-bucket/aws"
+  version = "4.1.2"
 
+  bucket = "personal-media-d163odf2gjrcaplolwj94vj4nnvvvcp5"
 
-resource "aws_s3_bucket" "personal_media_bucket" {
-  bucket = "my-personal-media-bucket"
-}
+  force_destroy = false
 
-resource "aws_s3_bucket_ownership_controls" "personal_media_bucket" {
-  bucket = aws_s3_bucket.personal_media_bucket.id
-  rule {
-    object_ownership = "BucketOwnerPreferred"
+  versioning = {
+    enabled = false
   }
-}
 
-resource "aws_s3_bucket_acl" "personal_media_bucket" {
-  depends_on = [aws_s3_bucket_ownership_controls.personal_media_bucket]
+  lifecycle_rule = [{
 
-  bucket = aws_s3_bucket.personal_media_bucket.id
-  acl    = "private"
-}
+    enabled = true
+    id      = "straight-to-glacier"
 
-resource "aws_s3_bucket" "annemette_disk_dump" {
-  bucket = "annemette-disk-dump"
-}
+    transition = [
+      {
+        days          = 1
+        storage_class = "GLACIER_IR"
+      },
+    ]
+  }]
 
-resource "aws_s3_bucket_ownership_controls" "annemette_disk_dump" {
-  bucket = aws_s3_bucket.annemette_disk_dump.id
-  rule {
-    object_ownership = "BucketOwnerPreferred"
+  tags = {
+    Name        = "media-01"
+    Environment = "production"
   }
-}
-
-resource "aws_s3_bucket_acl" "annemette_disk_dump" {
-  depends_on = [aws_s3_bucket_ownership_controls.annemette_disk_dump]
-
-  bucket = aws_s3_bucket.annemette_disk_dump.id
-  acl    = "private"
-}
-
-resource "aws_s3_bucket_lifecycle_configuration" "annemette_disk_dump" {
-  bucket = aws_s3_bucket.annemette_disk_dump.id
-
-  rule {
-    id     = "cold_storage_rule"
-    status = "Enabled"
-
-    transition {
-      days          = 7
-      storage_class = "GLACIER_IR"
-    }
-  }
-}
-
-module "storage-am-backups-dump" {
-  source      = "./modules/private-s3-storage"
-  bucket_name = "annemette-backups-dump-qlftbtzciyn7dzyh"
-
-  use_cold_storage = true
 }
 
 #
