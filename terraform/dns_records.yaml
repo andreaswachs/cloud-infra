@@ -1,0 +1,68 @@
+records:
+  - name: wachs.email
+    type: TXT
+    zone: wachs.email
+    ttl: 300
+    records:
+      [
+        "protonmail-verification=fc87f29172f1c3f306c6047de68a915122729e16",
+        "v=spf1 include:_spf.protonmail.ch ~all",
+        "v=DMARC1; p=quarantine",
+      ]
+
+  - name: wachs.email
+    type: MX
+    zone: wachs.email
+    ttl: 300
+    records: ["10 mail.protonmail.ch", "20 mailsec.protonmail.ch"]
+
+  - name: protonmail._domainkey
+    type: CNAME
+    zone: wachs.email
+    records:
+      [
+        "protonmail.domainkey.dr6a3pp5hnutjxzamczsmsnfmtqpv3l5dewazmjo7vxyow6efxn2q.domains.proton.ch.",
+      ]
+
+  - name: protonmail2._domainkey
+    type: CNAME
+    zone: wachs.email
+    records:
+      [
+        "protonmail2.domainkey.dr6a3pp5hnutjxzamczsmsnfmtqpv3l5dewazmjo7vxyow6efxn2q.domains.proton.ch.",
+      ]
+
+  - name: protonmail3._domainkey
+    type: CNAME
+    zone: wachs.email
+    records:
+      [
+        "protonmail3.domainkey.dr6a3pp5hnutjxzamczsmsnfmtqpv3l5dewazmjo7vxyow6efxn2q.domains.proton.ch.",
+      ]
+
+  - name: wachs.work
+    zone: wachs.work
+    type: AAAA
+    records:
+      [
+        "2606:50c0:8000::153",
+        "2606:50c0:8001::153",
+        "2606:50c0:8002::153",
+        "2606:50c0:8003::153",
+      ]
+
+  - name: wachs.work
+    zone: wachs.work
+    type: A
+    records:
+      [
+        "185.199.108.153",
+        "185.199.109.153",
+        "185.199.110.153",
+        "185.199.111.153",
+      ]
+
+  - name: www.wachs.work
+    zone: wachs.work
+    type: CNAME
+    records: ["andreaswachs.github.io/wachswork"]
