@@ -63,3 +63,28 @@ module "storage_am" {
     Environment = "production"
   }
 }
+
+module "self_hosted_irsa_discovery_bucket" {
+  source  = "terraform-aws-modules/s3-bucket/aws"
+  version = "4.1.2"
+
+  bucket = "irsa-discovery-bucket-umsreupygnuy7rbjvdv1qrfxzhxbgii"
+
+  force_destroy = false
+
+  versioning = {
+    enabled = false
+  }
+
+  block_public_acls       = false
+  block_public_policy     = false
+  ignore_public_acls      = false
+  restrict_public_buckets = false
+
+  tags = {
+    Name        = "self_hosted_irsa_discovery_bucket"
+    Environment = "production"
+  }
+}
+
+
